@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   smtp-queue:
-    build: .
+    image: ghcr.io/seameee/simple-smtp-queue:master
     container_name: smtp-queue-app
     restart: unless-stopped
     ports:
