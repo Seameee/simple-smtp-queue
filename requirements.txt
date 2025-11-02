@@ -1,0 +1,7 @@
+aiosmtpd==1.4.4
+aioredis==2.0.1
+PyYAML==6.0.1
+python-dotenv==1.0.0
+email-validator==2.0.0
+asyncio-mq==0.2.1
+aiosqlite==0.19.0

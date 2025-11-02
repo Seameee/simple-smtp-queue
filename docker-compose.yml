@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  smtp-queue:
+    build: .
+    container_name: smtp-queue-app
+    restart: unless-stopped
+    ports:
+      - "8025:8025"  # SMTP代理端口
+    environment:
+      - SMTP_QUEUE_LOG_LEVEL=INFO
+      - SMTP_QUEUE_PROXY_HOST=0.0.0.0
+      - SMTP_QUEUE_PROXY_PORT=8025
+      - SMTP_QUEUE_REDIS_HOST=redis
+      - SMTP_QUEUE_REDIS_PORT=6379
+      - SMTP_QUEUE_SMTP_HOST=smtp.example.com
+      - SMTP_QUEUE_SMTP_PORT=587
+      - SMTP_QUEUE_SMTP_USERNAME=your-username
+      - SMTP_QUEUE_SMTP_PASSWORD=your-password
+      - SMTP_QUEUE_RATE_LIMIT=10
+      - SMTP_QUEUE_RATE_WINDOW=60
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    depends_on:
+      - redis
+    networks:
+      - smtp-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: smtp-queue-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks:
+      - smtp-network
+
+  # 可选：Web管理界面（如果需要）
+  # web-admin:
+  #   build: 
+  #     context: .
+  #     dockerfile: Dockerfile.admin
+  #   container_name: smtp-queue-admin
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     - API_URL=http://smtp-queue:8025
+  #   depends_on:
+  #     - smtp-queue
+  #   networks:
+  #     - smtp-network
+
+volumes:
+  redis-data:
+    driver: local
+
+networks:
+  smtp-network:
+    driver: bridge
